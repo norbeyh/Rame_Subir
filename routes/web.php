@@ -5,7 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\ValoracionController;
-use App\Http\Controllers\AdminController; // Centralizado arriba
+use App\Http\Controllers\AdminController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -13,13 +13,13 @@ use Inertia\Inertia;
 
 // --- RUTAS PÚBLICAS ---
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
+    return Inertia::render('Invitados', [
+        'lugaresDestacados' => \App\Models\Lugar::latest()->limit(6)->get(),   // ← Cambiado aquí (evita error)
+        'lugares'           => \App\Models\Lugar::all(),
+        'canLogin'          => Route::has('login'),
+        'canRegister'       => Route::has('register'),
     ]);
-})->name('welcome');
+})->name('invitados');
 
 Route::post('/contactos', [ContactoController::class, 'store'])->name('contactos.store');
 Route::get('/explorar', [SearchController::class, 'index'])->name('explorar');
@@ -52,7 +52,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     // Gestión de Perfil Admin
     Route::post('/profile/update', [AdminController::class, 'updateProfile'])->name('admin.profile.update');
     
-    // Gestión de otros Admins (¡ESTAS DEBEN IR AQUÍ ADENTRO!)
+    // Gestión de otros Admins
     Route::post('/admins/store', [AdminController::class, 'storeAdmin'])->name('admin.admins.store');
     Route::patch('/admins/toggle/{id}', [AdminController::class, 'toggleAdminStatus'])->name('admin.admins.toggle');
 
