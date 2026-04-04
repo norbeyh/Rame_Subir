@@ -8,7 +8,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     libpng-dev \
     libonig-dev \
-    libxml2-dev
+    libxml2-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # 2. Instalar extensiones de PHP
 RUN docker-php-ext-install pdo pdo_mysql bcmath gd
@@ -17,8 +18,9 @@ RUN docker-php-ext-install pdo pdo_mysql bcmath gd
 RUN curl -sL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y nodejs
 
-# 4. Habilitar mod_rewrite para Laravel
-RUN a2enmod rewrite
+# 4. Habilitar mod_rewrite y corregir error de MPM (Multi-Processing Module)
+# Esto evita el error AH00534 al desactivar mpm_event y activar mpm_prefork
+RUN a2dismod mpm_event && a2enmod mpm_prefork && a2enmod rewrite
 
 # 5. Configurar Apache para que apunte a /public
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
@@ -33,7 +35,10 @@ WORKDIR /var/www/html
 COPY . .
 
 # 8. Instalar dependencias de PHP y corregir permisos
-RUN composer install --no-interaction --optimize-autoloader
+# Se usa --no-dev para producción
+RUN composer install --no-interaction --optimize-autoloader --no-dev
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
+# 9. Exponer puerto y arrancar Apache
 EXPOSE 80
+CMD ["apache2-foreground"]
