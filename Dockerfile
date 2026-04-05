@@ -12,6 +12,8 @@ RUN curl -sL https://deb.nodesource.com/setup_20.x | bash - && apt-get install -
 # 4. SOLUCIÓN AL ERROR MPM (Mata el conflicto de raíz)
 # Desactivamos el módulo que Railway intenta forzar y activamos el que Laravel necesita
 RUN a2dismod mpm_event || true && \
+    a2dismod mpm_worker || true && \
+    a2dismod mpm_prefork || true && \
     a2enmod mpm_prefork && \
     a2enmod rewrite
 
