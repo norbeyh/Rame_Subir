@@ -1,6 +1,6 @@
 FROM php:8.2-apache
 
-# 1. Forzar la desactivación de MPM Event al inicio para evitar el conflicto
+# 1. Limpiar cualquier configuración previa de MPM que Railway intente forzar
 RUN a2dismod mpm_event || true && a2enmod mpm_prefork && a2enmod rewrite
 
 # 2. Dependencias del sistema
@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 # 3. Extensiones PHP
 RUN docker-php-ext-install pdo pdo_mysql bcmath gd
 
-# 4. Node.js (Versión 20)
+# 4. Node.js 20 (Para Vite)
 RUN curl -sL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
 
@@ -25,8 +25,10 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 COPY . .
 
-# 7. Instalación y Permisos
+# 7. Construcción total (Lo que antes hacía la variable, ahora lo hace el Dockerfile)
 RUN composer install --no-interaction --optimize-autoloader --no-dev
+RUN npm install && npm run build
+RUN php artisan optimize && php artisan storage:link
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 EXPOSE 80
