@@ -24,4 +24,4 @@ RUN php artisan config:clear && php artisan cache:clear && php artisan config:ca
 
 EXPOSE 8080
 
-CMD php artisan migrate:fresh --force && php artisan tinker --execute="dd(DB::connection()->getConfig());"
+CMD php artisan migrate:fresh --force && php -r "require 'vendor/autoload.php'; \$app = require 'bootstrap/app.php'; \$kernel = \$app->make(Illuminate\Contracts\Console\Kernel::class); \$kernel->bootstrap(); print_r(config('database.connections.mysql')); exit;"
