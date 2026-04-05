@@ -20,7 +20,7 @@ RUN chmod -R 775 storage bootstrap/cache
 RUN php artisan optimize && php artisan storage:link
 
 # 🔥 CLAVE
-RUN php artisan config:clear && php artisan cache:clear && php artisan config:cache
+RUN composer install --no-dev --optimize-autoloader
 
 EXPOSE 8080
 
