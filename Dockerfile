@@ -11,11 +11,13 @@ RUN curl -sL https://deb.nodesource.com/setup_20.x | bash - && apt-get install -
 
 # 4. SOLUCIÓN AL ERROR MPM (Mata el conflicto de raíz)
 # Desactivamos el módulo que Railway intenta forzar y activamos el que Laravel necesita
-RUN a2dismod mpm_event || true && \
-    a2dismod mpm_worker || true && \
-    a2dismod mpm_prefork || true && \
+# 4. SOLUCIÓN DEFINITIVA MPM (FORZADO)
+RUN rm -f /etc/apache2/mods-enabled/mpm_*.load && \
+    rm -f /etc/apache2/mods-enabled/mpm_*.conf && \
     a2enmod mpm_prefork && \
     a2enmod rewrite
+
+RUN apachectl -M
 
 # 5. Configurar Apache para apuntar a /public
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
@@ -35,4 +37,4 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 
 # 8. Comando de arranque
 EXPOSE 80
-CMD php artisan migrate --force && apache2-foreground
+CMD php artisan migrate --force && apache2ctl -D FOREGROUND
