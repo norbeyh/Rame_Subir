@@ -1,5 +1,5 @@
 FROM php:8.2-cli
-
+RUN echo "ESTE ES EL NUEVO DOCKER 🔥"
 RUN apt-get update && apt-get install -y \
     unzip git curl libpng-dev libonig-dev libxml2-dev libmariadb-dev nodejs npm \
     && rm -rf /var/lib/apt/lists/*
