@@ -24,4 +24,4 @@ RUN php artisan config:clear && php artisan cache:clear && php artisan config:ca
 
 EXPOSE 8080
 
-CMD php artisan migrate:fresh --force && php artisan tinker
+CMD php artisan migrate:fresh --force && php artisan tinker --execute="dd(DB::connection()->getConfig());"
